@@ -1,5 +1,8 @@
 package training.supportbank;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.math.BigDecimal;
 
 public class Transaction {
@@ -8,6 +11,8 @@ public class Transaction {
     private String to;
     private String narrative;
     private BigDecimal amount;
+    private static final Logger LOGGER = LogManager.getLogger();
+
 
     public Transaction(String date, String from, String to, String narrative, BigDecimal amount) {
         this.date = date;
@@ -15,6 +20,7 @@ public class Transaction {
         this.to = to;
         this.narrative = narrative;
         this.amount = amount;
+        LOGGER.info("Created a transaction between " + this.from + " and " + this.to);
     }
 
     public Transaction(String[] transactionRow) {
@@ -23,6 +29,8 @@ public class Transaction {
         this.to = transactionRow[2];
         this.narrative = transactionRow[3];
         this.amount = new BigDecimal(transactionRow[4]);
+        LOGGER.info("Created a transaction between " + this.from + " and " + this.to);
+
     }
 
     public String getDate() {
