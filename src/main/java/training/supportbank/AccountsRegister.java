@@ -4,26 +4,32 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Arrays;
 
 public class AccountsRegister {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private HashMap<String, Account> htAccounts = new HashMap<String, Account>();
+    private HashMap<String, String> htNameAsFirstEntered = new HashMap<String, String>();
 
     public AccountsRegister(List<String[]> transactionsTable) {
         LOGGER.info("Attempting to create a register of accounts");
         for (String[] transactionRow: transactionsTable) {
             if (isConvertibleToTransaction(transactionRow)) {
                 LOGGER.info("Adding accounts for transaction participants if not already existing");
-                htAccounts.putIfAbsent(transactionRow[1], new Account(transactionRow[1]));
-                htAccounts.putIfAbsent(transactionRow[2], new Account(transactionRow[2]));
+                String sender = TextHandler.simplifyStringAndMakeLowercase(transactionRow[1]);
+                String recipient = TextHandler.simplifyStringAndMakeLowercase(transactionRow[2]);
+
+                htAccounts.putIfAbsent(sender, new Account(sender));
+                htAccounts.putIfAbsent(recipient, new Account(recipient));
+                htNameAsFirstEntered.putIfAbsent(sender, TextHandler.simplifyString(transactionRow[1]));
+                htNameAsFirstEntered.putIfAbsent(recipient, TextHandler.simplifyString(transactionRow[2]));
 
                 Transaction currentTransaction = new Transaction(transactionRow);
-                htAccounts.get(transactionRow[1]).addOutgoingTransaction(currentTransaction);
-                htAccounts.get(transactionRow[2]).addIncomingTransaction(currentTransaction);
+                htAccounts.get(sender).addOutgoingTransaction(currentTransaction);
+                htAccounts.get(recipient).addIncomingTransaction(currentTransaction);
             }
             else {
                 LOGGER.error("A transaction could not be created for row " + Arrays.toString(transactionRow));
@@ -38,7 +44,7 @@ public class AccountsRegister {
             return false;
         }
         try {
-            BigDecimal amountAsDecimal = new BigDecimal(transactionRow[4]);
+            new BigDecimal(transactionRow[4]);
         }
         catch (NumberFormatException e) {
             LOGGER.error(Arrays.toString(transactionRow) + " - final value could not be converted to amount");
@@ -50,18 +56,21 @@ public class AccountsRegister {
     public void printAllAccountsAndBalances() {
         LOGGER.info("Attempting to print all account names and balances");
         for (String person: htAccounts.keySet()) {
+            String nameAsFirstEntered = htNameAsFirstEntered.get(person);
             Account currentAccount = htAccounts.get(person);
-            System.out.println(person + ": " + currentAccount.getBalance());
+            System.out.println(nameAsFirstEntered + ": " + currentAccount.getBalance());
         }
     }
 
     public void printTransactionsForPerson(String name) {
         LOGGER.info("Attempting to print account information and transactions for \"" + name + "\"");
-        if (!htAccounts.containsKey(name))
+        String simplifiedName = TextHandler.simplifyStringAndMakeLowercase(name);
+
+        if (!htAccounts.containsKey(simplifiedName))
             System.out.println("No account found for \"" + name + "\"");
         else {
-            Account thisAccount = htAccounts.get(name);
-            System.out.println("Account transaction details for " + name + ":");
+            Account thisAccount = htAccounts.get(simplifiedName);
+            System.out.println("Account transaction details for " + htNameAsFirstEntered.get(simplifiedName) + ":");
             for (Transaction transaction: thisAccount.getTransactions()) {
                 transaction.printTransaction();
             }

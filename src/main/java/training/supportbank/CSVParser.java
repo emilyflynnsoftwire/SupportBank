@@ -9,17 +9,18 @@ import java.io.IOException;
 import java.util.List;
 
 public class CSVParser {
-    private List<String[]> table;
     private static final Logger LOGGER = LogManager.getLogger();
+
+    private List<String[]> table;
 
     public CSVParser(String filename) {
         try {
             CSVReader reader = new CSVReader(new FileReader(filename));
             table = reader.readAll();
-            LOGGER.info("Parsed the file successfully!");
+            LOGGER.info("Parsed file successfully!");
         }
         catch (IOException e) {
-            LOGGER.error("Something was wrong with the file");
+            LOGGER.error("File I/O error - file \"" + filename + "\" might not exist");
             table = null;
         }
     }
