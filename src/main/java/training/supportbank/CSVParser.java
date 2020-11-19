@@ -6,9 +6,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
 
 public class CSVParser extends Parser {
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public CSVParser(String filename) {
         try {
