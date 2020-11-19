@@ -9,6 +9,8 @@ public class Main {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static void main(String[] args) {
+        LOGGER.info("New session started");
+
         Parser csvParser = new CSVParser("Transactions2014.csv");
         List<String[]> transactionTable = csvParser.getTable();
         if (transactionTable == null)
@@ -19,10 +21,10 @@ public class Main {
         }
         AccountsRegister accountsRegister = new AccountsRegister(transactionTable);
 
-        if(args.length!=0) {
+        if (args.length != 0) {
             if (args[1].toLowerCase().equals("all")) {
                 accountsRegister.printAllAccountsAndBalances();
-            } else{
+            } else {
                 String personToList = args[1] + " " + args[2];
                 accountsRegister.printTransactionsForPerson(personToList);
             }
