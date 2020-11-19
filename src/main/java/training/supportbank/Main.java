@@ -9,7 +9,7 @@ public class Main {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static void main(String[] args) {
-        CSVParser csvParser = new CSVParser("Transactions2014.csv");
+        Parser csvParser = new CSVParser("Transactions2014.csv");
         List<String[]> transactionTable = csvParser.getTable();
         if (transactionTable == null)
         {
