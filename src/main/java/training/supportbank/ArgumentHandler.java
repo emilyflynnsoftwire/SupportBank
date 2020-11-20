@@ -12,33 +12,29 @@ public class ArgumentHandler {
     }
 
     private static boolean isValidCommand(String command) {
-        String simplifiedCommand = TextHandler.simplifyStringAndMakeLowercase(command);
-        boolean hasAtLeastTwoSpaceDelimitedParts = simplifiedCommand.split("\\s", 2).length == 2;
+        boolean hasAtLeastTwoSpaceDelimitedParts = command.split("\\s", 2).length == 2;
 
-        if (simplifiedCommand.equals("exit") || simplifiedCommand.equals("quit"))
+        if (command.equals("exit") || command.equals("quit"))
             return true;
-        else if (simplifiedCommand.startsWith("list") && hasAtLeastTwoSpaceDelimitedParts)
+        else if (command.startsWith("list") && hasAtLeastTwoSpaceDelimitedParts)
             return true;
         else
             return false;
     }
 
     private static boolean isExitCommand(String command) {
-        String simplifiedCommand = TextHandler.simplifyStringAndMakeLowercase(command);
-        return simplifiedCommand.equals("exit") || simplifiedCommand.equals("quit");
+        return command.equals("exit") || command.equals("quit");
     }
 
     private static boolean isListCommand(String command) {
-        String simplifiedCommand = TextHandler.simplifyStringAndMakeLowercase(command);
-        return simplifiedCommand.startsWith("list ");
+        return command.startsWith("list ");
     }
 
     private static void runListCommand(String command, AccountsRegister accountsRegister) {
-        String simplifiedCommand = TextHandler.simplifyStringAndMakeLowercase(command);
-        if (simplifiedCommand.equals("list all"))
+        if (command.equals("list all"))
             accountsRegister.printAllAccountsAndBalances();
         else
-            accountsRegister.printTransactionsForPerson(simplifiedCommand.split("\\s", 2)[1]);
+            accountsRegister.printTransactionsForPerson(command.split("\\s", 2)[1]);
     }
 
     private static String requestInitialCommand(Scanner scanner) {
@@ -54,7 +50,7 @@ public class ArgumentHandler {
         System.out.println("Would you like to run another command? (y/n)");
         String response = scanner.nextLine();
         System.out.println();
-        return TextHandler.simplifyString(response).startsWith("n");
+        return TextHandler.removeExcessSpace(response).toLowerCase().startsWith("n");
     }
 
     public static void run(AccountsRegister accountsRegister) {
@@ -62,10 +58,11 @@ public class ArgumentHandler {
 
         while (true) {
             printAvailableCommands();
-            String command = requestInitialCommand(scanner);
+            String commandInput = requestInitialCommand(scanner);
+            String command = TextHandler.removeExcessSpace(commandInput).toLowerCase();
 
             if (!isValidCommand(command))
-                System.out.println("Your input \"" + command + "\" does not match any recognised commands.");
+                System.out.println("Your input \"" + commandInput + "\" does not match any recognised commands.");
             if (isListCommand(command))
                 runListCommand(command, accountsRegister);
             if (isExitCommand(command) || shouldDiscontinueCommandRequests(scanner)) {

@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
         LOGGER.info("New session started!");
 
-        CSVParser csvParser = new CSVParser("Transactions2014.csv");
+        CSVParser csvParser = new CSVParser("DodgyTransactions2015.csv");
         List<String[]> transactionTable = csvParser.getTable();
         if (transactionTable == null)
         {

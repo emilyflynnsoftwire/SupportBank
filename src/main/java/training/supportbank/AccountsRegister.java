@@ -11,66 +11,104 @@ import java.util.Arrays;
 public class AccountsRegister {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private HashMap<String, Account> htAccounts = new HashMap<String, Account>();
-    private HashMap<String, String> htNameAsFirstEntered = new HashMap<String, String>();
+    private final HashMap<String, Account> htAccounts = new HashMap<String, Account>();
 
     public AccountsRegister(List<String[]> transactionsTable) {
         LOGGER.info("Attempting to create a register of accounts");
-        for (String[] transactionRow: transactionsTable) {
+        boolean errorFreeSoFar = true;
+
+        for (int index = 0; index < transactionsTable.size(); index++) {
+            String[] transactionRow = transactionsTable.get(index);
             if (isConvertibleToTransaction(transactionRow)) {
                 LOGGER.info("Adding accounts for transaction participants if not already existing");
-                String sender = TextHandler.simplifyStringAndMakeLowercase(transactionRow[1]);
-                String recipient = TextHandler.simplifyStringAndMakeLowercase(transactionRow[2]);
+                String sender = TextHandler.removeExcessSpace(transactionRow[1]);
+                String recipient = TextHandler.removeExcessSpace(transactionRow[2]);
 
-                htAccounts.putIfAbsent(sender, new Account(sender));
-                htAccounts.putIfAbsent(recipient, new Account(recipient));
-                htNameAsFirstEntered.putIfAbsent(sender, TextHandler.simplifyString(transactionRow[1]));
-                htNameAsFirstEntered.putIfAbsent(recipient, TextHandler.simplifyString(transactionRow[2]));
+                createAccountIfNotExisting(sender);
+                createAccountIfNotExisting(recipient);
 
                 Transaction currentTransaction = new Transaction(transactionRow);
-                htAccounts.get(sender).addOutgoingTransaction(currentTransaction);
-                htAccounts.get(recipient).addIncomingTransaction(currentTransaction);
+                getAccount(sender).addOutgoingTransaction(currentTransaction);
+                getAccount(recipient).addIncomingTransaction(currentTransaction);
             }
-            else {
+            else if (index > 0 || !isProbableHeaderRow(transactionRow)) {
                 LOGGER.error("A transaction could not be created for row " + Arrays.toString(transactionRow));
+                if (errorFreeSoFar)
+                    System.out.println("Issues encountered in data:");
+                errorFreeSoFar = false;
+                displayErrorForRow(transactionRow, index);
             }
         }
+
+        if (!errorFreeSoFar)
+            warnErroneousRowsIgnored();
+    }
+
+    private void createAccountIfNotExisting(String name) {
+        String nameKey = name.toLowerCase();
+        htAccounts.putIfAbsent(nameKey, new Account(name));
+    }
+
+    private Account getAccount(String name) {
+        String nameKey = name.toLowerCase();
+        return htAccounts.get(nameKey);
+    }
+
+    private boolean isProbableHeaderRow(String[] transactionRow) {
+        return TextHandler.removeExcessSpace(transactionRow[0]).toLowerCase().contains("date");
     }
 
     private boolean isConvertibleToTransaction(String[] transactionRow) {
-        LOGGER.error("Checking validity of transaction " + Arrays.toString(transactionRow));
+        LOGGER.info("Checking validity of transaction " + Arrays.toString(transactionRow));
+        if (transactionRow.length != 5)
+            return false;
+        try {
+            new BigDecimal(transactionRow[4]);
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private void displayErrorForRow(String[] transactionRow, int index) {
         if (transactionRow.length != 5) {
             LOGGER.error("Wrong number of fields in row " + Arrays.toString(transactionRow) + " (should be 5)");
-            return false;
+            System.out.println("Row " + index + ": expected 5 items in row, got " + transactionRow.length);
         }
         try {
             new BigDecimal(transactionRow[4]);
         }
         catch (NumberFormatException e) {
             LOGGER.error(Arrays.toString(transactionRow) + " - final value could not be converted to amount");
-            return false;
+            System.out.println("Row " + index + ": couldn't convert \"" + transactionRow[4] + "\" to monetary amount");
         }
-        return true;
+    }
+
+    private static void warnErroneousRowsIgnored() {
+        System.out.println();
+        System.out.println(TextHandler.getBoldText("The affected rows will be ignored"));
+        System.out.println("--------------------");
+        System.out.println();
     }
 
     public void printAllAccountsAndBalances() {
         LOGGER.info("Attempting to print all account names and balances");
-        for (String person: htAccounts.keySet()) {
-            String nameAsFirstEntered = htNameAsFirstEntered.get(person);
-            Account currentAccount = htAccounts.get(person);
-            System.out.println(nameAsFirstEntered + ": " + currentAccount.getBalance());
+        for (String personKey: htAccounts.keySet()) {
+            Account currentAccount = getAccount(personKey);
+            System.out.println(currentAccount.getName() + ": " + currentAccount.getBalance());
         }
     }
 
     public void printTransactionsForPerson(String name) {
         LOGGER.info("Attempting to print account information and transactions for \"" + name + "\"");
-        String simplifiedName = TextHandler.simplifyStringAndMakeLowercase(name);
+        String nameKey = TextHandler.removeExcessSpace(name).toLowerCase();
 
-        if (!htAccounts.containsKey(simplifiedName))
+        if (!htAccounts.containsKey(nameKey))
             System.out.println("No account found for \"" + name + "\"");
         else {
-            Account thisAccount = htAccounts.get(simplifiedName);
-            System.out.println("Account transaction details for " + htNameAsFirstEntered.get(simplifiedName) + ":");
+            Account thisAccount = getAccount(nameKey);
+            System.out.println("Account transaction details for " + thisAccount.getName() + ":");
             for (Transaction transaction: thisAccount.getTransactions()) {
                 transaction.printTransaction();
             }

@@ -8,15 +8,9 @@ public class TextHandler {
         return BOLD + text + CLEAR;
     }
 
-    public static String simplifyString(String string) {
+    public static String removeExcessSpace(String string) {
         if (string == null)
             return null;
         return string.trim().replaceAll("\\s+", " ");
-    }
-
-    public static String simplifyStringAndMakeLowercase(String string) {
-        if (string == null)
-            return null;
-        return simplifyString(string).toLowerCase();
     }
 }
