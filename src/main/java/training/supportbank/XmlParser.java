@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -13,6 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class XmlParser extends Parser {
 
     public XmlParser(String filename) {
         try {
-            List<String[]> newTable = new ArrayList<>();
+            List<Transaction> newTable = new ArrayList<>();
 
             File inputFile = new File(filename);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -31,21 +31,28 @@ public class XmlParser extends Parser {
             NodeList nList = doc.getElementsByTagName("SupportTransaction");
 
             for (int i = 0; i < nList.getLength(); i++) {
-                Node currentTransaction = nList.item(i);
-                Element currentTransactionElement = (Element) currentTransaction;
-                String narrative = currentTransactionElement.getElementsByTagName("Description").item(0).getTextContent();
-                String value = currentTransactionElement.getElementsByTagName("Value").item(0).getTextContent();
+                try {
+                    Element curTranEl = (Element) nList.item(i);
 
-                Node parties = currentTransactionElement.getElementsByTagName("Parties").item(0);
-                Element partiesElement = (Element) parties;
-                String to = partiesElement.getElementsByTagName("To").item(0).getTextContent();
-                String from = partiesElement.getElementsByTagName("From").item(0).getTextContent();
+                    String date = curTranEl.getAttribute("Date");
+                    String narrative = curTranEl.getElementsByTagName("Description").item(0).getTextContent();
 
-                System.out.println(narrative);
-                System.out.println(value);
-                System.out.println(to);
-                System.out.println(from);
+                    String value = curTranEl.getElementsByTagName("Value").item(0).getTextContent();
+                    BigDecimal amount = new BigDecimal(value);
 
+                    Element partiesEl = (Element) curTranEl.getElementsByTagName("Parties").item(0);
+                    String to = partiesEl.getElementsByTagName("To").item(0).getTextContent();
+                    String from = partiesEl.getElementsByTagName("From").item(0).getTextContent();
+
+                    Transaction newTransaction = new Transaction(date, from, to, narrative, amount);
+                    newTransaction.setup();
+                    newTable.add(newTransaction);
+                }
+                catch (Exception e) {
+                    if(i!=0){//probably title line
+                        LOGGER.error("Error with node " + i);
+                    }
+                }
             }
             setTable(newTable);
             LOGGER.info("Parsed the file successfully!");

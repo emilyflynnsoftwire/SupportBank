@@ -13,35 +13,32 @@ public class AccountsRegister {
 
     private final HashMap<String, Account> htAccounts = new HashMap<String, Account>();
 
-    public AccountsRegister(List<String[]> transactionsTable) {
+    public AccountsRegister(List<Transaction> transactionsTable) {
         LOGGER.info("Attempting to create a register of accounts");
-        boolean errorFreeSoFar = true;
+//        boolean errorFreeSoFar = true;
 
-        for (int index = 0; index < transactionsTable.size(); index++) {
-            String[] transactionRow = transactionsTable.get(index);
-            if (isConvertibleToTransaction(transactionRow)) {
-                LOGGER.info("Adding accounts for transaction participants if not already existing");
-                String sender = TextHandler.removeExcessSpace(transactionRow[1]);
-                String recipient = TextHandler.removeExcessSpace(transactionRow[2]);
+        for(Transaction transaction: transactionsTable){
+            LOGGER.info("Adding accounts for transaction participants if not already existing");
 
-                createAccountIfNotExisting(sender);
-                createAccountIfNotExisting(recipient);
+            String sender = transaction.getFromAccount();
+            String recipient = transaction.getToAccount();
 
-                Transaction currentTransaction = new Transaction(transactionRow);
-                getAccount(sender).addOutgoingTransaction(currentTransaction);
-                getAccount(recipient).addIncomingTransaction(currentTransaction);
-            }
-            else if (index > 0 || !isProbableHeaderRow(transactionRow)) {
-                LOGGER.error("A transaction could not be created for row " + Arrays.toString(transactionRow));
-                if (errorFreeSoFar)
-                    System.out.println("Issues encountered in data:");
-                errorFreeSoFar = false;
-                displayErrorForRow(transactionRow, index);
-            }
+            createAccountIfNotExisting(sender);
+            createAccountIfNotExisting(recipient);
+
+            getAccount(sender).addOutgoingTransaction(transaction);
+            getAccount(recipient).addIncomingTransaction(transaction);
+//            else if (index > 0 || !isProbableHeaderRow(transactionRow)) {
+//                LOGGER.error("A transaction could not be created for row " + Arrays.toString(transactionRow));
+//                if (errorFreeSoFar)
+//                    System.out.println("Issues encountered in data:");
+//                errorFreeSoFar = false;
+//                displayErrorForRow(transactionRow, index);
+//            }
         }
 
-        if (!errorFreeSoFar)
-            warnErroneousRowsIgnored();
+//        if (!errorFreeSoFar)
+//            warnErroneousRowsIgnored();
     }
 
     private void createAccountIfNotExisting(String name) {

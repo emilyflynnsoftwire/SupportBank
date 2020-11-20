@@ -12,13 +12,13 @@ public class Main {
         LOGGER.info("New session started!");
 
 //        Parser csvParser = new CSVParser("Transactions2014.csv");
-//        List<String[]> transactionTable = csvParser.getTable();
+//        List<Transaction> transactionTable = csvParser.getTable();
 
 //        Parser jsonParser = new JsonParser("Transactions2013.json");
-//        List<String[]> transactionTable = jsonParser.getTable();
+//        List<Transaction> transactionTable = jsonParser.getTable();
 
         Parser xmlParser = new XmlParser("Transactions2012.xml");
-        List<String[]> transactionTable = xmlParser.getTable();
+        List<Transaction> transactionTable = xmlParser.getTable();
 
         if (transactionTable == null)
         {

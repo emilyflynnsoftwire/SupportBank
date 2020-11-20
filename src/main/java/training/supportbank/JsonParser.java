@@ -10,24 +10,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class JsonParser extends Parser {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public JsonParser(String filename) {
         try {
-            List<String[]> newTable = new ArrayList<>();
+            List<Transaction> newTable = new ArrayList<>();
             Gson gson = new Gson();
             JsonReader reader = new JsonReader(new FileReader(filename));
-            JsonLine[] jsonLines = gson.fromJson(reader, JsonLine[].class);
-            for (int i = 0; i < jsonLines.length; i++) {
-                JsonLine line = jsonLines[i];
-                String[] tableLine = {line.getDate(),
-                        line.getFromAccount(),
-                        line.getToAccount(),
-                        line.getNarrative(),
-                        line.getAmount()};
-                newTable.add(tableLine);
+            Transaction[] transactions = gson.fromJson(reader, Transaction[].class);
+            int i = 0;
+            for (Transaction newTransaction : transactions) {
+                try {
+                    newTransaction.setup();
+                    newTable.add(newTransaction);
+                } catch (Exception e){
+                    if(i!=0){//probably title line
+                        LOGGER.error("Error with line " + i);
+                    }
+                }
+                i++;
+
             }
             setTable(newTable);
             LOGGER.info("Parsed the file successfully!");

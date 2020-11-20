@@ -1,18 +1,15 @@
 package training.supportbank;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.List;
 
 public abstract class Parser {
-    private List<String[]> table = null;
+    private List<Transaction> table = null;
 
-    public List<String[]> getTable() {
+    public List<Transaction> getTable() {
         return table;
     }
 
-    public void setTable(List<String[]> table) {
+    public void setTable(List<Transaction> table) {
         this.table = table;
     }
 
