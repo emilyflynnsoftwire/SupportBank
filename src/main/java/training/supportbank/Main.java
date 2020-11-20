@@ -14,8 +14,11 @@ public class Main {
 //        Parser csvParser = new CSVParser("Transactions2014.csv");
 //        List<String[]> transactionTable = csvParser.getTable();
 
-        Parser jsonParser = new JsonParser("Transactions2013.json");
-        List<String[]> transactionTable = jsonParser.getTable();
+//        Parser jsonParser = new JsonParser("Transactions2013.json");
+//        List<String[]> transactionTable = jsonParser.getTable();
+
+        Parser xmlParser = new XmlParser("Transactions2012.xml");
+        List<String[]> transactionTable = xmlParser.getTable();
 
         if (transactionTable == null)
         {
