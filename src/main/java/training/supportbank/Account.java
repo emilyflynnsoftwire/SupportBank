@@ -1,22 +1,16 @@
 package training.supportbank;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.ArrayList;
+import java.math.BigDecimal;
 
 public class Account {
-    private static final Logger LOGGER = LogManager.getLogger();
-
     private final String name;
-    private final List<Transaction> transactions = new ArrayList<Transaction>();
-    private BigDecimal balance = new BigDecimal("0");
-
+    private final List<Transaction> transactions = new ArrayList<>();
+    private BigDecimal balance = new BigDecimal(0);
 
     public Account(String name) {
-        LOGGER.info("Creating an account for " + name);
+        DialogueHandler.logInfo("Creating an account for " + name);
         this.name = name;
     }
 

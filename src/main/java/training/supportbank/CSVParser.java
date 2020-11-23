@@ -1,39 +1,34 @@
 package training.supportbank;
 
 import com.opencsv.CSVReader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CSVParser extends Parser {
-    private static final Logger LOGGER = LogManager.getLogger();
+    List<String[]> readingData = null;
 
     public CSVParser(String filename) {
+        setFilename(filename);
+    }
+
+    @Override
+    public boolean checkIntermediaryDataAfterReading() {
         try {
-            List<Transaction> newTable = new ArrayList<>();
-            CSVReader reader = new CSVReader(new FileReader(filename));
-            int i = 0;
-            for(String[] csvLine: reader) {
-                try {
-                    Transaction newTransaction = new Transaction(csvLine);
-                    newTransaction.setup();
-                    newTable.add(newTransaction);
-                } catch (Exception e){
-                    if(i!=0){//probably title line
-                        LOGGER.error("Error with line " + i);
-                    }
-                }
-                i++;
-            }
-            setTable(newTable);
-            LOGGER.info("Parsed the file successfully!");
+            CSVReader reader = new CSVReader(new FileReader(getFilename()));
+            this.readingData = reader.readAll();
+            return true;
         }
         catch (IOException e) {
-            LOGGER.error("File I/O error - file \"" + filename + "\" might not exist");
+            DialogueHandler.outputIOExceptionMessage(getFilename());
         }
+        return false;
+    }
+
+    @Override
+    public boolean checkExtractedRawTransactionData() {
+        setRawTransactionData(readingData.stream().map(RawTransaction::new).toArray(RawTransaction[]::new));
+        return true;
     }
 }
