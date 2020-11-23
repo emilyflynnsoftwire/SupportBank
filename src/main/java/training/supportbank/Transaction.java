@@ -55,6 +55,7 @@ public class Transaction {
     }
 
     public void printTransaction() {
-        System.out.println(dateObject + " - from " + from + " to " + to + " - £" + amount + " (" + narrative + ")");
+        System.out.printf("%s |   %-11s  ->   %-11s  | %8s   (%s)\n",
+                dateObject, from, to, TextHandler.getNonNegativeMonetary(amount), narrative);
     }
 }

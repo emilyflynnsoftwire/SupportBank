@@ -47,9 +47,11 @@ public class Bank {
 
     public void printAllAccountsAndBalances() {
         DialogueHandler.logInfo("Attempting to print all accounts and balances");
+        System.out.println("All accounts currently loaded:");
         for (String personKey: accountsMap.keySet()) {
             Account currentAccount = getAccount(personKey);
-            System.out.println(currentAccount.getName() + ": " + currentAccount.getBalance());
+            System.out.printf("%11s | %s\n",
+                    currentAccount.getName(), TextHandler.getGeneralMonetary(currentAccount.getBalance()));
         }
     }
 
@@ -58,7 +60,7 @@ public class Bank {
         String nameKey = TextHandler.removeExcessSpace(name).toLowerCase();
 
         if (!accountsMap.containsKey(nameKey))
-            System.out.println("No account found for \"" + name + "\".");
+            DialogueHandler.outputError("No account found for \"" + name + "\".");
         else {
             Account thisAccount = getAccount(nameKey);
             System.out.println("Account transaction details for " + thisAccount.getName() + ":");
